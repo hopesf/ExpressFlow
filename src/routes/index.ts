@@ -6,7 +6,7 @@ import registry from "./registry.json";
 interface Service {
   apiName: string;
   host: string;
-  port: number;
+  port: string;
   url: string;
 }
 
@@ -40,7 +40,8 @@ router.all("/:projectName/:path", (req, res) => {
 
 router.post("/newProject", async (req, res) => {
   const projectInfo = req.body;
-  projectInfo.port = parseInt(projectInfo.port.toString());
+  projectInfo.url = `${projectInfo.protocol}://${projectInfo.host}:${projectInfo.port}`;
+
   _registry.services[projectInfo.apiName] = { ...projectInfo };
 
   fs.writeFile("./src/routes/registry.json", JSON.stringify(_registry), (err) => {
