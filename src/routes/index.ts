@@ -1,56 +1,126 @@
-import fs from "fs";
-import express from "express";
+import express, { Router, Request, Response } from "express";
 import axios from "axios";
+import { promises as fs } from "fs";
 import registry from "./registry.json";
+import Registry, { ServiceInstance } from "./types";
+import * as loadBalancer from "../util/loadBalancer";
 
-interface Service {
-  apiName: string;
-  host: string;
-  port: string;
-  url: string;
-}
+// const _loadBalancer: loadBalancer.LoadBalancer = loadBalancer;
+const router: Router = express.Router();
+const registryData: Registry = registry;
+const _loadBalancer: any = loadBalancer;
 
-interface Registry {
-  services: { [key: string]: Service };
-}
-
-const _registry: Registry = registry;
-
-const router = express.Router();
-
-router.all("/:projectName/:path", (req, res) => {
-  const serviceName = req.params.projectName;
-  const service = _registry.services[serviceName];
-
-  if (service) {
-    const apiUrl = `${service.url}/${req.params.path}`;
-
-    axios({
-      method: req.method,
-      url: apiUrl,
-      headers: req.headers,
-      data: req.body,
-    }).then((response) => {
-      res.send(response.data);
-    });
+// Enable/Disable API Endpoint
+router.post("/enable/:apiName", async (req: Request, res: Response) => {
+  const apiName: string = req.params.apiName;
+  const requestBody: { url: string; enabled: boolean } = req.body;
+  const instances = registryData.services[apiName].instances;
+  const index = instances.findIndex((srv) => {
+    return srv.url === requestBody.url;
+  });
+  if (index == -1) {
+    res.send({ status: "error", message: "Could not find '" + requestBody.url + "' for service '" + apiName + "'" });
   } else {
-    res.status(404).send("Service not found");
+    instances[index].enabled = requestBody.enabled;
+    try {
+      await fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData));
+      res.status(200).json({ status: "success", message: `Successfully enabled/disabled '${requestBody.url}' for service '${apiName}'` });
+    } catch (error) {
+      res.status(500).json({ status: "error", message: `Could not enable/disable '${requestBody.url}' for service '${apiName}':\n${error}` });
+    }
   }
 });
 
-router.post("/newProject", async (req, res) => {
-  const projectInfo = req.body;
-  projectInfo.url = `${projectInfo.protocol}://${projectInfo.host}:${projectInfo.port}`;
+// Route to handle API requests
+router.all("/:apiName/:path", async (req: Request, res: Response) => {
+  const apiName: string = req.params.apiName;
+  const service = registryData.services[apiName];
 
-  _registry.services[projectInfo.apiName] = { ...projectInfo };
+  if (service) {
+    if (!service.loadBalanceStrategy) {
+      service.loadBalanceStrategy = "ROUND_ROBIN";
+      try {
+        await fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData));
+      } catch (error) {
+        res.status(500).json({ status: "error", message: `Couldn't write load balance strategy: ${error}` });
+        return;
+      }
+    }
 
-  fs.writeFile("./src/routes/registry.json", JSON.stringify(_registry), (err) => {
-    if (err) {
-      res.send("Yeni proje kaydedilemedi " + projectInfo.apiName + "\n" + err);
-    } else {
-      res.send("Yeni proje kaydedildi " + projectInfo.apiName);
+    const newIndex = _loadBalancer[service.loadBalanceStrategy](service);
+    const url = service.instances[newIndex].url;
+    console.log(url);
+    axios({
+      method: req.method,
+      url: url + req.params.path,
+      headers: req.headers,
+      data: req.body,
+    })
+      .then((response) => {
+        res.send(response.data);
+      })
+      .catch((error) => {
+        res.send("");
+      });
+  } else {
+    res.send("API Name doesn't exist");
+  }
+});
+
+// Register API
+router.post("/register", async (req, res) => {
+  const registrationInfo = req.body;
+  registrationInfo.url = registrationInfo.protocol + "://" + registrationInfo.host + ":" + registrationInfo.port + "/";
+
+  if (apiAlreadyExists(registrationInfo)) {
+    res.send("Configuration already exists for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
+  } else {
+    registryData.services[registrationInfo.apiName].instances.push({ ...registrationInfo });
+    try {
+      await fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData));
+      res.status(200).json({ status: "success", message: `Successfully registered '${registrationInfo.apiName}'` });
+    } catch (error) {
+      res.status(500).json({ status: "error", message: `Could not register '${registrationInfo.apiName}':\n${error}` });
+    }
+  }
+});
+
+// Unregister API
+router.post("/unregister", async (req: Request, res: Response) => {
+  const registrationInfo = req.body;
+
+  if (apiAlreadyExists(registrationInfo)) {
+    const index = registryData.services[registrationInfo.apiName].instances.findIndex((instance) => {
+      return registrationInfo.url === instance.url;
+    });
+    registryData.services[registrationInfo.apiName].instances.splice(index, 1);
+    try {
+      await fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData));
+      res.status(200).json({ status: "success", message: `Successfully unregistered '${registrationInfo.apiName}'` });
+    } catch (error) {
+      res.status(500).json({ status: "error", message: `Could not unregister '${registrationInfo.apiName}':\n${error}` });
+    }
+  } else {
+    res.status(400).json({ status: "error", message: `Configuration does not exist for '${registrationInfo.apiName}' at '${registrationInfo.url}'` });
+  }
+});
+
+const apiAlreadyExists = (registrationInfo: ServiceInstance) => {
+  let exists = false;
+
+  const checkExistService = registryData.services[registrationInfo.apiName];
+  if (!checkExistService) {
+    return exists;
+  }
+
+  registryData.services[registrationInfo.apiName].instances.forEach((instance) => {
+    if (instance.url === registrationInfo.url) {
+      exists = true;
+      return;
     }
   });
-});
+
+  return exists;
+};
 
 export default router;
