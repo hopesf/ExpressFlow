@@ -2,71 +2,76 @@ import express, { Router, Request, Response } from "express";
 import axios from "axios";
 import * as fs from "fs";
 import registry from "./registry.json";
-import Registry, { ServiceInstance } from "./types";
-import * as loadBalancer from "../util/loadBalancer";
+import IRegistry, { IServiceInstance } from "./types";
 import authMiddleware from "../middleware/authMiddleware";
+import loadBalancer from "../util/loadBalancer";
 
 const router: Router = express.Router();
-const registryData: Registry = registry;
+const registryData: IRegistry = registry;
 const _loadBalancer: any = loadBalancer;
 
-// watch gateway
-router.get("/monitor", (req: Request, res: Response) => res.render("index", { services: registryData.services }));
+// Route for monitoring
+router.get("/monitor", (req: Request, res: Response) => {
+  res.render("index", { services: registryData.services });
+});
 
-// register services
+// Route to register services
 router.post("/register", authMiddleware, (req: Request, res: Response) => {
-  const registrationInfo = req.body;
-  registrationInfo.url = registrationInfo.protocol + "://" + registrationInfo.host + ":" + registrationInfo.port + "/";
+  const registrationInfo: IServiceInstance = req.body;
+  registrationInfo.url = `${registrationInfo.protocol}://${registrationInfo.host}:${registrationInfo.port}/`;
 
   if (apiAlreadyExists(registrationInfo)) {
-    res.send("Configuration already exists for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
+    res.send(`Configuration already exists for '${registrationInfo.apiName}' at '${registrationInfo.url}'`);
   } else {
     registryData.services[registrationInfo.apiName].instances.push({ ...registrationInfo });
-    fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData), (error) => {
-      if (error) {
-        res.send("Couldn't write to registry.json" + error);
-      }
-    });
-    res.send("Configuration added for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
+    updateRegistryFile(res, "Configuration added for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
   }
 });
 
+// Route to unregister services
 router.post("/unregister", authMiddleware, (req: Request, res: Response) => {
-  const registrationInfo = req.body;
+  const registrationInfo: IServiceInstance = req.body;
 
   if (apiAlreadyExists(registrationInfo)) {
     const index = registryData.services[registrationInfo.apiName].instances.findIndex((instance) => {
       return registrationInfo.url === instance.url;
     });
 
-    registryData.services[registrationInfo.apiName].instances.splice(index, 1);
-    fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData), (error) => {
-      if (error) {
-        res.send("Couldn't write to registry.json" + error);
-      }
-    });
-    res.send("Successfully unregistered '" + registrationInfo.apiName + "'");
-  } else {
-    res.send("Configuration does not exist for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
+    if (index !== -1) {
+      registryData.services[registrationInfo.apiName].instances.splice(index, 1);
+      updateRegistryFile(res, `Successfully unregistered '${registrationInfo.apiName}'`);
+    } else {
+      res.send(`Configuration does not exist for '${registrationInfo.apiName}' at '${registrationInfo.url}'`);
+    }
   }
 });
 
-// get services
-router.all("/:apiName/:path", (req, res) => {
+// Route to enable/disable services
+router.post("/enable/:apiName", (req: Request, res: Response) => {
+  const apiName = req.params.apiName;
+  const requestBody = req.body;
+  const instances = registryData.services[apiName].instances;
+  const index = instances.findIndex((srv) => srv.url === requestBody.url);
+
+  if (index === -1) {
+    res.send({ status: "error", message: `Could not find '${requestBody.url}' for service '${apiName}'` });
+  } else {
+    instances[index].enabled = requestBody.enabled;
+    updateRegistryFile(res, `Successfully enabled/disabled '${requestBody.url}' for service '${apiName}'`);
+  }
+});
+
+// Route to redirect services
+router.all("/:apiName/:path", (req: Request, res: Response) => {
   const service = registryData.services[req.params.apiName];
   if (service) {
     if (!service.loadBalanceStrategy) {
       service.loadBalanceStrategy = "ROUND_ROBIN";
-      fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData), (error) => {
-        if (error) {
-          res.send("Couldn't write load balance strategy" + error);
-        }
-      });
+      updateRegistryFile(res, "Couldn't write load balance strategy");
     }
 
     const newIndex = _loadBalancer[service.loadBalanceStrategy](service);
     const url = service.instances[newIndex].url;
-    console.log(url);
     axios({
       method: req.method,
       url: url + req.params.path,
@@ -84,17 +89,18 @@ router.all("/:apiName/:path", (req, res) => {
   }
 });
 
-const apiAlreadyExists = (registrationInfo: ServiceInstance) => {
-  let exists = false;
+const apiAlreadyExists = (registrationInfo: IServiceInstance) => {
+  return registryData.services[registrationInfo.apiName].instances.some((instance) => instance.url === registrationInfo.url);
+};
 
-  registryData.services[registrationInfo.apiName].instances.forEach((instance) => {
-    if (instance.url === registrationInfo.url) {
-      exists = true;
-      return;
+const updateRegistryFile = (res: Response, message: string) => {
+  fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData), (error) => {
+    if (error) {
+      res.send("Couldn't write to registry.json" + error);
+    } else {
+      res.send(message);
     }
   });
-
-  return exists;
 };
 
 export default router;

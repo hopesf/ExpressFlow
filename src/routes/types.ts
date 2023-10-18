@@ -1,4 +1,4 @@
-export interface ServiceInstance {
+export interface IServiceInstance {
   apiName: string;
   protocol: string;
   host: string;
@@ -7,17 +7,17 @@ export interface ServiceInstance {
   enabled?: boolean;
 }
 
-export interface Service {
+export interface IService {
   index: number;
-  instances: ServiceInstance[];
+  instances: IServiceInstance[];
   loadBalanceStrategy?: string;
 }
 
-export interface Registry {
-  services: Record<string, Service>; // Define services as a dictionary
+export interface IRegistry {
+  services: Record<string, IService>; // Define services as a dictionary
   auth: {
     users: Record<string, { username: string; password: string }>;
   };
 }
 
-export default Registry;
+export default IRegistry;
