@@ -4,13 +4,16 @@ import { promises as fs } from "fs";
 import registry from "./registry.json";
 import Registry, { ServiceInstance } from "./types";
 import * as loadBalancer from "../util/loadBalancer";
+import authMiddleware from "../middleware/authMiddleware";
 
 // const _loadBalancer: loadBalancer.LoadBalancer = loadBalancer;
 const router: Router = express.Router();
 const registryData: Registry = registry;
 const _loadBalancer: any = loadBalancer;
 
-router.post("/register", async (req, res) => {
+router.get("/monitor", (req: Request, res: Response) => res.render("index", { services: registryData.services }));
+
+router.post("/register", authMiddleware, async (req: Request, res: Response) => {
   const registrationInfo = req.body;
   registrationInfo.url = registrationInfo.protocol + "://" + registrationInfo.host + ":" + registrationInfo.port + "/";
 
@@ -23,7 +26,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/unregister", async (req, res) => {
+router.post("/unregister", authMiddleware, async (req: Request, res: Response) => {
   const registrationInfo = req.body;
 
   if (apiAlreadyExists(registrationInfo)) {
@@ -32,7 +35,7 @@ router.post("/unregister", async (req, res) => {
     });
 
     registryData.services[registrationInfo.apiName].instances.splice(index, 1);
-    await fs.writeFile("./routes/registry.json", JSON.stringify(registryData));
+    await fs.writeFile("./src/routes/registry.json", JSON.stringify(registryData));
     res.send("Successfully unregistered '" + registrationInfo.apiName + "'");
   } else {
     res.send("Configuration does not exist for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
@@ -51,4 +54,5 @@ const apiAlreadyExists = (registrationInfo: ServiceInstance) => {
 
   return exists;
 };
+
 export default router;
