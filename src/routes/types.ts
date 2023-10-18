@@ -10,7 +10,7 @@ export interface ServiceInstance {
 export interface Service {
   index: number;
   instances: ServiceInstance[];
-  loadBalanceStrategy: string;
+  loadBalanceStrategy?: string;
 }
 
 export interface Registry {

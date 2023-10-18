@@ -25,23 +25,13 @@ app.use(helmet());
 
 const { PORT, NODE_ENV } = process.env;
 
-const auth = (req: Request, res: Response, next: NextFunction) => {
+const auth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const url = req.protocol + "://" + req.hostname + PORT + req.path;
-  if (req.path === "/") {
-    next();
-    return;
-  }
-  if (!req.headers.authorization) {
-    res.send({ authenticated: false, path: url, message: "Authentication Unsuccessful: No Authorization Header" });
-    return;
-  }
-
-  const authorization: string = req.headers.authorization;
-
-  const authString = Buffer.from(authorization, "base64").toString("utf8");
+  const authString = Buffer.from(req.headers.authorization as string, "base64").toString("utf8");
   const authParts = authString.split(":");
   const username = authParts[0];
   const password = authParts[1];
+
   console.log(username + " | " + password);
   const user = registryData.auth.users[username];
   if (user) {
@@ -63,4 +53,4 @@ app.use("/", routes);
 
 // app listen
 
-app.listen(PORT, () => console.log(`[${NODE_ENV}] Dua Kapıları açıldı ${PORT}`));
+app.listen(PORT, () => console.log(`[${NODE_ENV}] Gate açıldı ${PORT}`));
