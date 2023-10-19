@@ -27,3 +27,5 @@ app.use("/", routes);
 // app listen
 const { PORT, NODE_ENV } = process.env;
 app.listen(PORT, () => console.log(`[${NODE_ENV}] Gate açıldı ${PORT}`));
+
+export default app;
