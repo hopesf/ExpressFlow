@@ -20,11 +20,20 @@ router.post("/register", authMiddleware, (req: Request, res: Response) => {
   const registrationInfo: IServiceInstance = req.body;
   registrationInfo.url = `${registrationInfo.protocol}://${registrationInfo.host}:${registrationInfo.port}/`;
 
-  if (apiAlreadyExists(registrationInfo)) {
-    res.send(`Configuration already exists for '${registrationInfo.apiName}' at '${registrationInfo.url}'`);
-  } else {
-    registryData.services[registrationInfo.apiName].instances.push({ ...registrationInfo });
+  if (!registryData.services[registrationInfo.apiName]) {
+    registryData.services[registrationInfo.apiName] = {
+      index: 0,
+      instances: [registrationInfo],
+      loadBalanceStrategy: "ROUND_ROBIN",
+    };
     updateRegistryFile(res, "Configuration added for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
+  } else {
+    if (apiAlreadyExists(registrationInfo)) {
+      res.send(`Configuration already exists for '${registrationInfo.apiName}' at '${registrationInfo.url}'`);
+    } else {
+      registryData.services[registrationInfo.apiName].instances.push({ ...registrationInfo });
+      updateRegistryFile(res, "Configuration added for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
+    }
   }
 });
 
@@ -72,6 +81,7 @@ router.all("/:apiName/:path", (req: Request, res: Response) => {
 
     const newIndex = _loadBalancer[service.loadBalanceStrategy](service);
     const url = service.instances[newIndex].url;
+
     axios({
       method: req.method,
       url: url + req.params.path,
@@ -82,7 +92,7 @@ router.all("/:apiName/:path", (req: Request, res: Response) => {
         res.send(response.data);
       })
       .catch((error) => {
-        res.send("");
+        res.send(error);
       });
   } else {
     res.send("API Name doesn't exist");

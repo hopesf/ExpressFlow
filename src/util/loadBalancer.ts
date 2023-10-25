@@ -10,8 +10,8 @@ const isEnabled = (service: IService, index: number, loadBalanceStrategy: Functi
 const ROUND_ROBIN = (service: IService): number => {
   const newIndex = ++service.index >= service.instances.length ? 0 : service.index;
   service.index = newIndex;
+
   return isEnabled(service, newIndex, ROUND_ROBIN);
-  // return newIndex;
 };
 
 const loadBalancer: ILoadBalancer = {

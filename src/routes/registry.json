@@ -1,13 +1,10 @@
 {
   "services": {
-    "entegration": {
-      "index": 3,
+    "entegration-ui": {
+      "index": 0,
       "instances": [
-        { "apiName": "entegration", "protocol": "http", "host": "localhost", "port": "2001", "url": "http://localhost:2001/", "enabled": false },
-        { "apiName": "entegration", "protocol": "http", "host": "localhost", "port": "2002", "url": "http://localhost:2002/", "enabled": true },
-        { "apiName": "entegration", "protocol": "http", "host": "localhost", "port": "2003", "url": "http://localhost:2003/", "enabled": true },
-        { "apiName": "entegration", "protocol": "http", "host": "localhost", "port": "2004", "url": "http://localhost:2004/", "enabled": true },
-        { "apiName": "entegration", "protocol": "http", "host": "localhost", "port": "2005", "url": "http://localhost:2005/", "enabled": false }
+        { "apiName": "entegration-ui", "protocol": "http", "host": "localhost", "port": "2001", "enabled": true, "url": "http://localhost:2001/" },
+        { "apiName": "entegration-ui", "protocol": "http", "host": "localhost", "port": "2002", "enabled": true, "url": "http://localhost:2002/" }
       ],
       "loadBalanceStrategy": "ROUND_ROBIN"
     }
