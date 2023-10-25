@@ -1,32 +1,47 @@
 import { NextFunction, Request, Response } from "express";
-import registry from "../routes/registry.json";
-import Registry from "../routes/types";
+import ApiAuthorizations from "../models/ApiAuthorizations";
 
-const registryData: Registry = registry;
 const { PORT } = process.env;
 
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+const checkDbForAuth = async (username: string, password: string) => {
+  try {
+    const check = await ApiAuthorizations.findOne({ username, password });
+    return check ? true : false;
+  } catch (error) {
+    console.log(error, "checkDbForAuth func error");
+    return null;
+  }
+};
+
+const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const url = req.protocol + "://" + req.hostname + PORT + req.path;
 
   if (!req.headers.authorization) {
     res.send({ authenticated: false, path: url, message: "Authentication Unsuccessful: No Authorization Header." });
   } else {
-    const authString = Buffer.from(req.headers.authorization as string, "base64").toString("utf8");
-    const authParts = authString.split(":");
+    const authParts = Buffer.from(req.headers.authorization.split(" ")[1], "base64").toString().split(":");
 
     const username = authParts[0];
     const password = authParts[1];
 
-    const user = registryData.auth.users[username];
+    const result = await checkDbForAuth(username, password);
 
-    if (!user) {
-      return res.send({ authenticated: false, path: url, message: "Authentication Unsuccessful: User " + username + " does not exist." });
+    if (result === null) {
+      return res.send({
+        authenticated: false,
+        path: url,
+        message: "Something went wrong while authenticating user: " + username + " password: " + password,
+      });
     }
 
-    if (user.username === username && user.password === password) {
-      next();
+    if (result === false) {
+      return res.send({
+        authenticated: false,
+        path: url,
+        message: "Authentication unsuccessful",
+      });
     } else {
-      res.send({ authenticated: false, path: url, message: "Authentication Unsuccessful: Incorrect password." });
+      next();
     }
   }
 };

@@ -20,4 +20,18 @@ export interface IRegistry {
   };
 }
 
+export interface Ix {
+  name: string;
+  loadBalanceStrategy: string;
+  instances: [
+    {
+      protocol: string;
+      host: string;
+      port: string;
+      enabled: boolean;
+      url: string;
+    }
+  ];
+}
+
 export default IRegistry;

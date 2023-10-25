@@ -2,12 +2,17 @@
 import dotenv from "dotenv";
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
+// connect mongodb
+import connectDb from "./helpers/connectDb";
+connectDb();
+
 // other imports
 import express from "express";
 import compression from "compression";
 import helmet from "helmet";
 
 // router import
+import authMiddleware from "./middleware/authMiddleware";
 import routes from "./routes";
 
 // app started
@@ -16,13 +21,11 @@ const app = express();
 // app usages
 app.disable("x-powered-by");
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
-app.set("view engine", "ejs");
 app.use(compression());
 app.use(express.json());
 app.use(helmet());
-
-app.use("/", routes);
+app.use(authMiddleware);
+app.use(routes);
 
 // app listen
 const { PORT, NODE_ENV } = process.env;
