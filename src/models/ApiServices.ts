@@ -3,7 +3,7 @@ import { Schema, model } from "mongoose";
 interface IApiServices {
   name: string;
   loadBalanceStrategy: string;
-  test: string;
+  index: number;
   instances: [
     {
       protocol: string;
@@ -19,7 +19,7 @@ const ApiServicesSchema = new Schema<IApiServices>(
   {
     name: String,
     loadBalanceStrategy: String,
-    test: String,
+    index: Number,
     instances: [
       {
         _id: false,

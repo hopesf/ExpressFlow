@@ -11,10 +11,11 @@ const ROUND_ROBIN = (service: IService): number => {
   const newIndex = ++service.index >= service.instances.length ? 0 : service.index;
   service.index = newIndex;
 
+  // return newIndex;
   return isEnabled(service, newIndex, ROUND_ROBIN);
 };
 
-const loadBalancer: ILoadBalancer = {
+const loadBalancer: any = {
   isEnabled,
   ROUND_ROBIN,
 };

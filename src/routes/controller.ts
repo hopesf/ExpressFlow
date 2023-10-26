@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
+import axios from "axios";
+
 import { IServiceInstance, IapiAlreadyExists } from "./types";
 
 import ApiServices from "../models/ApiServices";
 import { jois } from "../util/joiValidates";
 import { apiAlreadyExists, createNewApi, updateApi } from "../functions";
+import loadBalancer from "../util/loadBalancer";
 
 // controllers
 const mainController = (_: Request, res: Response) => {
@@ -81,30 +84,42 @@ const enableController = async (req: Request, res: Response) => {
   }
 };
 
-const redirectController = (req: Request, res: Response) => {
-  //   const service = registryData.services[req.params.apiName];
-  // if (service) {
-  //   if (!service.loadBalanceStrategy) {
-  //     service.loadBalanceStrategy = "ROUND_ROBIN";
-  //     updateRegistryFile(res, "Couldn't write load balance strategy");
-  //   }
-  //   const newIndex = _loadBalancer[service.loadBalanceStrategy](service);
-  //   const url = service.instances[newIndex].url;
-  //   axios({
-  //     method: req.method,
-  //     url: url + req.params.path,
-  //     headers: req.headers,
-  //     data: req.body,
-  //   })
-  //     .then((response) => {
-  //       res.send(response.data);
-  //     })
-  //     .catch((error) => {
-  //       res.send(error);
-  //     });
-  // } else {
-  //   res.send("API Name doesn't exist");
-  // }
+const redirectController = async (req: Request, res: Response) => {
+  try {
+    const apiName = req.params.apiName;
+    // burada apiName'i mongodbde arayacağız.
+    const checkExist = await apiAlreadyExists({ apiName });
+    if (!checkExist) return res.status(400).json({ error: "Api bulunamadı" });
+
+    if (!checkExist.loadBalanceStrategy) {
+      checkExist.loadBalanceStrategy = "ROUND_ROBIN";
+      checkExist.index = 0;
+      await ApiServices.findOneAndUpdate({ name: apiName }, { index: 0, loadBalanceStrategy: "ROUND_ROBIN" });
+    }
+
+    const index = loadBalancer[checkExist.loadBalanceStrategy](checkExist);
+    const url = checkExist.instances[index].url;
+
+    console.log(url);
+
+    axios({
+      method: req.method,
+      url: url + req.params.path,
+      headers: req.headers,
+      data: req.body,
+    })
+      .then((response) => {
+        res.json(response.data);
+      })
+      .catch((error) => {
+        res.json(error);
+      });
+
+    // update index in mongodb
+    await ApiServices.findOneAndUpdate({ name: apiName }, { index });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 const controllers = {

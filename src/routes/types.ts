@@ -23,6 +23,7 @@ export interface IRegistry {
 export interface IapiAlreadyExists {
   name: string;
   loadBalanceStrategy: string;
+  index: number;
   instances: [
     {
       protocol: string;
