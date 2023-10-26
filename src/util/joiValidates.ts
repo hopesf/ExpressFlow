@@ -5,6 +5,18 @@ const registerSchema = {
   protocol: Joi.string().required(),
   host: Joi.string().required(),
   port: Joi.string().required(),
+  enabled: Joi.boolean().required(),
+};
+
+const unRegisterSchema = {
+  apiName: Joi.string().required(),
+  url: Joi.string().required(),
+};
+
+const enableDisableSchema = {
+  apiName: Joi.string().required(),
+  enabled: Joi.boolean().required(),
+  url: Joi.string().required(),
 };
 
 async function validateBodyData(schema: object, validateData: object) {
@@ -18,5 +30,7 @@ async function validateBodyData(schema: object, validateData: object) {
 
 export const jois = {
   register: registerSchema,
+  unregister: unRegisterSchema,
+  enableDisable: enableDisableSchema,
   validateFunc: validateBodyData,
 };

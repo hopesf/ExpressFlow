@@ -1,30 +1,9 @@
 import { Request, Response } from "express";
-import { IServiceInstance, Ix } from "./types";
+import { IServiceInstance, IapiAlreadyExists } from "./types";
 
 import ApiServices from "../models/ApiServices";
 import { jois } from "../util/joiValidates";
-
-// helper funcs
-const apiAlreadyExists = async (registrationInfo: IServiceInstance): Promise<Ix | null> => {
-  const check = await ApiServices.findOne({ name: registrationInfo.apiName });
-  return check ? check : null;
-  //   return registryData.services[registrationInfo.apiName].instances.some((instance) => instance.url === registrationInfo.url);
-};
-
-const createNewApi = async (registrationInfo: IServiceInstance) => {
-  try {
-    const initialObj = {
-      name: registrationInfo.apiName,
-      loadBalanceStrategy: "ROUND_ROBIN",
-      instances: [registrationInfo],
-    };
-
-    const newApi = new ApiServices(initialObj);
-    await newApi.save();
-  } catch (error: any) {
-    throw new Error(`Error while creating new api:${error}`);
-  }
-};
+import { apiAlreadyExists, createNewApi, updateApi } from "../functions";
 
 // controllers
 const mainController = (_: Request, res: Response) => {
@@ -46,63 +25,60 @@ const registerController = async (req: Request, res: Response) => {
       await createNewApi(registrationInfo);
       res.status(201).json({ message: "Api oluşturuldu" });
     } else {
-      console.log("mongoda zaten bu api varmış, o yüzden instanceları güncellenecek");
-
-      const _instances = checkExist.instances;
-      console.log("_instances", _instances);
+      // console.log("mongoda zaten bu api varmış, o yüzden instanceları güncellenecek");
+      await updateApi(checkExist, registrationInfo);
+      res.status(201).json({ message: "Api Güncellendi" });
     }
-
-    // generate url address
   } catch (error: any) {
     // Doğrulama hatası olursa buraya ulaşılır
     res.status(400).json({ error: error.message });
   }
-
-  // if (!registryData.services[registrationInfo.apiName]) {
-  //   registryData.services[registrationInfo.apiName] = {
-  //     index: 0,
-  //     instances: [registrationInfo],
-  //     loadBalanceStrategy: "ROUND_ROBIN",
-  //   };
-  //   updateRegistryFile(res, "Configuration added for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
-  // } else {
-  //   if (apiAlreadyExists(registrationInfo)) {
-  //     res.send(`Configuration already exists for '${registrationInfo.apiName}' at '${registrationInfo.url}'`);
-  //   } else {
-  //     registryData.services[registrationInfo.apiName].instances.push({ ...registrationInfo });
-  //     updateRegistryFile(res, "Configuration added for '" + registrationInfo.apiName + "' at '" + registrationInfo.url + "'");
-  //   }
-  // }
 };
 
-const unregisterController = (req: Request, res: Response) => {
-  const registrationInfo: IServiceInstance = req.body;
+const unregisterController = async (req: Request, res: Response) => {
+  try {
+    const registrationInfo: IServiceInstance = req.body;
+    //validate
+    await jois.validateFunc(jois.unregister, registrationInfo);
 
-  // if (apiAlreadyExists(registrationInfo)) {
-  //   const index = registryData.services[registrationInfo.apiName].instances.findIndex((instance) => {
-  //     return registrationInfo.url === instance.url;
-  //   });
+    // burada apiName'i mongodbde arayacağız.
+    const checkExist = await apiAlreadyExists(registrationInfo);
+    if (!checkExist) return res.status(400).json({ error: "Api bulunamadı" });
 
-  //   if (index !== -1) {
-  //     registryData.services[registrationInfo.apiName].instances.splice(index, 1);
-  //     updateRegistryFile(res, `Successfully unregistered '${registrationInfo.apiName}'`);
-  //   } else {
-  //     res.send(`Configuration does not exist for '${registrationInfo.apiName}' at '${registrationInfo.url}'`);
-  //   }
-  // }
+    const _instances = checkExist.instances;
+    const existingIndex = _instances.findIndex((instance) => instance.url === registrationInfo.url);
+    if (existingIndex === -1) return res.status(400).json({ error: "Api bulunamadı" });
+
+    _instances.splice(existingIndex, 1);
+    await ApiServices.findOneAndUpdate({ name: registrationInfo.apiName }, { instances: _instances });
+
+    res.status(200).json({ message: "Api silindi" });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
-const enableController = (req: Request, res: Response) => {
-  //   const apiName = req.params.apiName;
-  //   const requestBody = req.body;
-  //   const instances = registryData.services[apiName].instances;
-  //   const index = instances.findIndex((srv) => srv.url === requestBody.url);
-  //   if (index === -1) {
-  //     res.send({ status: "error", message: `Could not find '${requestBody.url}' for service '${apiName}'` });
-  //   } else {
-  //     instances[index].enabled = requestBody.enabled;
-  //     updateRegistryFile(res, `Successfully enabled/disabled '${requestBody.url}' for service '${apiName}'`);
-  //   }
+const enableController = async (req: Request, res: Response) => {
+  try {
+    const registrationInfo: IServiceInstance = req.body;
+    // validate
+    await jois.validateFunc(jois.enableDisable, registrationInfo);
+
+    // burada apiName'i mongodbde arayacağız.
+    const checkExist = await apiAlreadyExists(registrationInfo);
+    if (!checkExist) return res.status(400).json({ error: "Api bulunamadı" });
+
+    const _instances = checkExist.instances;
+    const existingIndex = _instances.findIndex((instance) => instance.url === registrationInfo.url);
+    if (existingIndex === -1) return res.status(400).json({ error: "Api bulunamadı" });
+
+    _instances[existingIndex].enabled = registrationInfo.enabled;
+    await ApiServices.findOneAndUpdate({ name: registrationInfo.apiName }, { instances: _instances });
+
+    res.status(200).json({ message: "Api güncellendi" });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 const redirectController = (req: Request, res: Response) => {

@@ -4,7 +4,7 @@ export interface IServiceInstance {
   host: string;
   port: string;
   url: string;
-  enabled?: boolean;
+  enabled: boolean;
 }
 
 export interface IService {
@@ -20,7 +20,7 @@ export interface IRegistry {
   };
 }
 
-export interface Ix {
+export interface IapiAlreadyExists {
   name: string;
   loadBalanceStrategy: string;
   instances: [
