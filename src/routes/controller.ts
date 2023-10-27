@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import axios from "axios";
 
-import { IServiceInstance, IapiAlreadyExists } from "./types";
+import { IServiceInstance } from "./types";
 
 import ApiServices from "../models/ApiServices";
 import { jois } from "../util/joiValidates";
@@ -32,9 +32,13 @@ const registerController = async (req: Request, res: Response) => {
       await updateApi(checkExist, registrationInfo);
       res.status(201).json({ message: "Api Güncellendi" });
     }
-  } catch (error: any) {
-    // Doğrulama hatası olursa buraya ulaşılır
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      // Doğrulama hatası olursa buraya ulaşılır
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Beklenmeyen bir sorun oluştu. hedef:registerController" });
+    }
   }
 };
 
@@ -56,8 +60,13 @@ const unregisterController = async (req: Request, res: Response) => {
     await ApiServices.findOneAndUpdate({ name: registrationInfo.apiName }, { instances: _instances });
 
     res.status(200).json({ message: "Api silindi" });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      // Doğrulama hatası olursa buraya ulaşılır
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Beklenmeyen bir sorun oluştu. hedef:unregisterController" });
+    }
   }
 };
 
@@ -79,8 +88,13 @@ const enableController = async (req: Request, res: Response) => {
     await ApiServices.findOneAndUpdate({ name: registrationInfo.apiName }, { instances: _instances });
 
     res.status(200).json({ message: "Api güncellendi" });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      // Doğrulama hatası olursa buraya ulaşılır
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Beklenmeyen bir sorun oluştu. hedef:enableController" });
+    }
   }
 };
 
@@ -117,8 +131,13 @@ const redirectController = async (req: Request, res: Response) => {
 
     // update index in mongodb
     await ApiServices.findOneAndUpdate({ name: apiName }, { index });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      // Doğrulama hatası olursa buraya ulaşılır
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Beklenmeyen bir sorun oluştu. hedef:redirectController" });
+    }
   }
 };
 

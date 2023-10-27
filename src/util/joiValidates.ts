@@ -1,5 +1,9 @@
 import Joi from "joi";
 
+interface ValidationError extends Error {
+  details: Joi.ValidationErrorItem[];
+}
+
 const registerSchema = {
   apiName: Joi.string().required(),
   protocol: Joi.string().required(),
@@ -22,9 +26,13 @@ const enableDisableSchema = {
 async function validateBodyData(schema: object, validateData: object) {
   try {
     await Joi.object(schema).validateAsync(validateData);
-  } catch (error: any) {
-    // Doğrulama hatası olursa hata mesajını yakala ve fırlat
-    throw new Error(error);
+  } catch (error) {
+    const validationError = error as ValidationError;
+    if (validationError.details) {
+      // Handle the validation error here, you can log it or perform other actions
+      throw validationError;
+    }
+    throw new Error("Validation error occurred.");
   }
 }
 

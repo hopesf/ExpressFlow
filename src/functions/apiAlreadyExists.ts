@@ -1,5 +1,5 @@
 import ApiServices from "../models/ApiServices";
-import { IServiceInstance, IapiAlreadyExists } from "../routes/types";
+import { IapiAlreadyExists } from "../routes/types";
 
 const apiAlreadyExists = async (registrationInfo: { apiName: string }): Promise<IapiAlreadyExists | null> => {
   const check = await ApiServices.findOne({ name: registrationInfo.apiName });

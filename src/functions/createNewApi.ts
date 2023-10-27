@@ -11,8 +11,14 @@ const createNewApi = async (registrationInfo: IServiceInstance) => {
 
     const newApi = new ApiServices(initialObj);
     await newApi.save();
-  } catch (error: any) {
-    throw new Error(`Error while creating new api:${error}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      throw error;
+    } else {
+      console.error("yeni api oluşturulurken bir sorun oluştu.");
+      throw new Error(`Error while creating new api:${error}`);
+    }
   }
 };
 
