@@ -1,6 +1,6 @@
 {
   "name": "api-gateway",
-  "version": "1.0.15",
+  "version": "1.0.14",
   "description": "Arasta ITC API Gateway Service",
   "main": "./src/index.js",
   "scripts": {
@@ -9,8 +9,7 @@
     "start": "NODE_ENV=production npm run build && NODE_ENV=production node build/index.js",
     "lint": "eslint . --ext .ts",
     "fix": "eslint . --ext .ts --fix",
-    "push": "npm run push-script",
-    "push-script": "git add . && git commit -m '🔧 $npm_config_commit' && npm version patch && git push origin main"
+    "push": "git add . && git commit -m '🔧 updated project' && npm version patch && git push origin main"
   },
   "keywords": [],
   "author": "",
