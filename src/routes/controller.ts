@@ -5,7 +5,7 @@ import { IServiceInstance } from "./types";
 
 import ApiServices from "../models/ApiServices";
 import { jois } from "../util/joiValidates";
-import { apiAlreadyExists, createNewApi, updateApi } from "../functions";
+import { apiAlreadyExists, checkApiUrlExist, createNewApi, updateApi } from "../functions";
 import loadBalancer from "../util/loadBalancer";
 
 // controllers
@@ -25,8 +25,13 @@ const registerController = async (req: Request, res: Response) => {
 
     if (!checkExist) {
       // eğer apiName yoksa mongodb'ye kaydedeceğiz.
-      await createNewApi(registrationInfo);
-      res.status(201).json({ message: "Api oluşturuldu" });
+      const urlCheck = await checkApiUrlExist(registrationInfo.url);
+      if (urlCheck) {
+        return res.status(200).json({ error: "Bu url zaten kullanımda" });
+      } else {
+        await createNewApi(registrationInfo);
+        res.status(201).json({ message: "Api oluşturuldu" });
+      }
     } else {
       // console.log("mongoda zaten bu api varmış, o yüzden instanceları güncellenecek");
       await updateApi(checkExist, registrationInfo);
