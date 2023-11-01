@@ -9,8 +9,10 @@ import { apiAlreadyExists, checkApiUrlExist, createNewApi, updateApi } from "../
 import loadBalancer from "../util/loadBalancer";
 
 // controllers
-const mainController = (_: Request, res: Response) => {
+const mainController = async (req: Request, res: Response) => {
   res.status(503).send("Service Unavailable");
+
+  console.log("en son bu mesaj gelmeli sonrada middlewarede görnmeli");
 };
 
 const registerController = async (req: Request, res: Response) => {
@@ -106,6 +108,7 @@ const enableController = async (req: Request, res: Response) => {
 const redirectController = async (req: Request, res: Response) => {
   try {
     const apiName = req.params.apiName;
+
     // burada apiName'i mongodbde arayacağız.
     const checkExist = await apiAlreadyExists({ apiName });
     if (!checkExist) return res.status(400).json({ error: "Api bulunamadı" });
