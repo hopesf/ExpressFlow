@@ -11,8 +11,6 @@ import loadBalancer from "../util/loadBalancer";
 // controllers
 const mainController = async (req: Request, res: Response) => {
   res.status(503).send("Service Unavailable");
-
-  console.log("en son bu mesaj gelmeli sonrada middlewarede görnmeli");
 };
 
 const registerController = async (req: Request, res: Response) => {
@@ -35,7 +33,6 @@ const registerController = async (req: Request, res: Response) => {
         res.status(201).json({ message: "Api oluşturuldu" });
       }
     } else {
-      // console.log("mongoda zaten bu api varmış, o yüzden instanceları güncellenecek");
       await updateApi(checkExist, registrationInfo);
       res.status(201).json({ message: "Api Güncellendi" });
     }
@@ -121,8 +118,6 @@ const redirectController = async (req: Request, res: Response) => {
 
     const index = loadBalancer[checkExist.loadBalanceStrategy](checkExist);
     const url = checkExist.instances[index].url;
-
-    console.log(url);
 
     axios({
       method: req.method,
