@@ -4,7 +4,7 @@ import controllers from "./controller";
 const router: Router = express.Router();
 
 router.get("/", controllers.main);
-router.get("/:id", (req, res, next) => {
+router.get("/:id", (req, res) => {
   res.send("list");
 });
 

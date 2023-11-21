@@ -1,5 +1,6 @@
 import ApiServices from "../models/ApiServices";
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 const checkApiUrlExist = async (url: string): Promise<Boolean> => {
   try {
     const allUrls = await ApiServices.aggregate([

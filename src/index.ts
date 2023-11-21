@@ -18,9 +18,7 @@ import cron from "node-cron";
 import helmet from "helmet";
 
 // router import
-import authMiddleware from "./middleware/authMiddleware";
 import routes from "./routes";
-import ManageRouterNetwork from "./functions/ManageRouterNetwork";
 
 // app started
 const app = express();
@@ -43,11 +41,13 @@ app.use(helmet());
 app.use(cors());
 app.use(limiter);
 // app.use(authMiddleware);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const helperRequests: any[] = [];
 
 app.use(async (req, res, next) => {
   const originalUrl = req.originalUrl;
-  const checkExist = helperRequests.find((item: any) => item.routerPath === originalUrl);
+  const checkExist = helperRequests.find((item: { routerPath: string }) => item.routerPath === originalUrl);
 
   if (!checkExist) {
     helperRequests.push({ routerPath: originalUrl, count: checkExist ? checkExist.count++ : 1, ready: false });
@@ -59,7 +59,7 @@ app.use(async (req, res, next) => {
 
 app.use(async (req, res, next) => {
   const originalUrl = req.originalUrl;
-  const checkExist = helperRequests.find((item: any) => item.routerPath === originalUrl);
+  const checkExist = helperRequests.find((item: { routerPath: string }) => item.routerPath === originalUrl);
 
   res.on("finish", async function () {
     if (checkExist) {
