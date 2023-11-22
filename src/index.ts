@@ -19,11 +19,18 @@ import helmet from "helmet";
 
 // router import
 import routes from "./routes";
+import getPoolChart from "./functions/getPoolChart";
+import getServiceLists from "./functions/getServiceLists";
+import getGatewayNetworkChart from "./functions/getGatewayNetworkChart";
+import getApiRobots from "./functions/getApiRobots";
+import getApiLogs from "./functions/getApiLogs";
+import getCounters from "./functions/getCounters";
+import { ApiLogs, ApiRobots, ApiServices, GatewayNetwork, MerchantPool } from "./models";
 
 // app started
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: "*" } });
+const io = new Server(httpServer, {transports: ["polling", "websocket",] , cors: {   origin: ["https://gateway.czlondon.com/"] } });
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -41,6 +48,8 @@ app.use(helmet());
 app.use(cors());
 app.use(limiter);
 // app.use(authMiddleware);
+
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const helperRequests: any[] = [];
@@ -88,6 +97,12 @@ let tick = 0;
   await connectDb()
     .then(async () => {
       io.on("connection", async (socket) => {
+        socket.emit("poolChart", await getPoolChart());
+        socket.emit("serviceLists", await getServiceLists());
+        socket.emit("gatewayNetworkChart", await getGatewayNetworkChart());
+        socket.emit("apiRobots", await getApiRobots());
+        socket.emit("apiLogs", await getApiLogs());
+        socket.emit("counters", await getCounters());
         setInterval(() => {
           os.cpuUsage((cpuPercent) => {
             socket.emit("cpu", {
@@ -97,6 +112,26 @@ let tick = 0;
           });
         }, 5000);
       });
+
+       // Merchant pool chartı için
+       MerchantPool.watch().on("change", async () => {
+        io.emit("poolChart", await getPoolChart());
+        io.emit("apiRobots", await getApiRobots());
+      });
+      // servis listesi için
+      ApiServices.watch().on("change", async () => {
+        io.emit("serviceLists", await getServiceLists());
+        io.emit("counters", await getCounters());
+      });
+      // api gateway anlık chart grafiği
+      GatewayNetwork.watch().on("change", async () => io.emit("gatewayNetworkChart", await getGatewayNetworkChart()));
+      // api robots listesi
+      ApiRobots.watch().on("change", async () => {
+        io.emit("apiRobots", await getApiRobots());
+        io.emit("counters", await getCounters());
+      });
+      // api logs listesi
+      ApiLogs.watch().on("change", async () => io.emit("apiLogs", await getApiLogs()));
 
       // app listen
       const { PORT, NODE_ENV } = process.env;
