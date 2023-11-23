@@ -47,6 +47,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 app.use(limiter);
+app.set('trust proxy', 1);
 // app.use(authMiddleware);
 
 

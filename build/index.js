@@ -77,6 +77,7 @@ app.use(express_1.default.json());
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
 app.use(limiter);
+app.set('trust proxy', 1);
 // app.use(authMiddleware);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const helperRequests = [];
