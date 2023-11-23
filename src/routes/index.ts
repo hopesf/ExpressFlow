@@ -21,17 +21,17 @@ router.post("/changeRobotStatus", async (req: Request, res: Response) => {
       .catch((err) => res.status(400).json({ message: err }));
   });
   
-  // this router should be update service status for manage services inside of instances
-  router.post("/changeServiceInstanceStatus", async (req: Request, res: Response) => {
-    const body = req.body;
-    if (!body) return res.status(400).json({ message: "body is required" });
-  
-    const { serviceName, instanceUrl, newStatus } = body;
-  
-    ApiServices.updateOne({ name: serviceName, "instances.url": instanceUrl }, { $set: { "instances.$.enabled": newStatus } }, { upsert: true })
-      .then(() => res.json({ message: "success" }))
-      .catch((err) => res.status(400).json({ message: err }));
-  });
+// this router should be update service status for manage services inside of instances
+router.post("/changeServiceInstanceStatus", async (req: Request, res: Response) => {
+  const body = req.body;
+  if (!body) return res.status(400).json({ message: "body is required" });
+
+  const { serviceName, instanceUrl, newStatus } = body;
+
+  ApiServices.updateOne({ name: serviceName, "instances.url": instanceUrl }, { $set: { "instances.$.enabled": newStatus } }, { upsert: true })
+    .then(() => res.json({ message: "success" }))
+    .catch((err) => res.status(400).json({ message: err }));
+});
   
 
 router.post("/register", controllers.register);

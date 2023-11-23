@@ -6,7 +6,8 @@ const createNewApi = async (registrationInfo: IServiceInstance) => {
     const initialObj = {
       name: registrationInfo.apiName,
       loadBalanceStrategy: "ROUND_ROBIN",
-      instances: [registrationInfo],
+      index:0,
+      instances: [registrationInfo]
     };
 
     const newApi = new ApiServices(initialObj);

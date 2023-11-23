@@ -30,7 +30,7 @@ import { ApiLogs, ApiRobots, ApiServices, GatewayNetwork, MerchantPool } from ".
 // app started
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, {transports: ["polling", "websocket",] , cors: {   origin: ["https://gateway.czlondon.com/"] } });
+const io = new Server(httpServer, {transports: ["polling", "websocket",] , cors: {   origin: ["*"] } });
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

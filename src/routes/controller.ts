@@ -119,12 +119,27 @@ const redirectController = async (req: Request, res: Response) => {
     const index = loadBalancer[checkExist.loadBalanceStrategy](checkExist);
     const url = checkExist.instances[index].url;
 
-    axios({
+    console.log(url);
+    console.log(req.params.path);
+    console.log(req.method, "method");
+    console.log(req.body, "body");
+
+    let initialRequest: {
+      method: string;
+      url: string;
+      headers: object;
+      data?: object;
+    } = {
       method: req.method,
-      url: url + req.params.path,
+      url: `${url + req.params.path}`,
       headers: req.headers,
-      data: req.body,
-    })
+    };
+
+    if (req.body.length > 0) {
+      initialRequest.data = req.body;
+    }
+
+    axios(initialRequest)
       .then((response) => {
         res.json(response.data);
       })
@@ -135,6 +150,7 @@ const redirectController = async (req: Request, res: Response) => {
     // update index in mongodb
     await ApiServices.findOneAndUpdate({ name: apiName }, { index });
   } catch (error) {
+    // console.log(error)
     if (error instanceof Error) {
       // Doğrulama hatası olursa buraya ulaşılır
       res.status(400).json({ error: error.message });
