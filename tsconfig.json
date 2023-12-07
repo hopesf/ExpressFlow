@@ -1,10 +1,16 @@
 {
+  "exclude": ["node_modules", "./build", "./coverage", "__test__", "./.vscode", "./.github"],
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  },
   "compilerOptions": {
     "target": "es2016",
     "lib": ["es6"],
     "module": "commonjs",
     "rootDir": "./",
     "resolveJsonModule": true,
+    "checkJs": true,
     "allowJs": true,
     "outDir": "build",
     "esModuleInterop": true,

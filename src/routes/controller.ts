@@ -10,7 +10,7 @@ import loadBalancer from "../util/loadBalancer";
 
 // controllers
 const mainController = async (req: Request, res: Response) => {
-  res.status(200).send("Service Unavailable");
+  res.status(200).json({ message: "Service Available" });
 };
 
 const registerController = async (req: Request, res: Response) => {

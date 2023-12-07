@@ -14,17 +14,17 @@ import cors from "cors";
 import { rateLimit } from "express-rate-limit";
 import compression from "compression";
 import * as os from "os-utils";
-import cron from "node-cron";
 import helmet from "helmet";
 
 // router import
 import swaggerDocs from "./util/swagger";
 import routes from "./routes";
+import cronFunc from "./util/cronJob";
 
 // app started
-const app = express();
+export const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: "*" } });
+export const io = new Server(httpServer, { cors: { origin: "*" } });
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -44,48 +44,10 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 app.use(limiter);
-
 // app.use(authMiddleware);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const helperRequests: any[] = [];
-
-app.use(async (req, res, next) => {
-  const originalUrl = req.originalUrl;
-  const checkExist = helperRequests.find((item: { routerPath: string }) => item.routerPath === originalUrl);
-
-  if (!checkExist) {
-    helperRequests.push({ routerPath: originalUrl, count: checkExist ? checkExist.count++ : 1, ready: false });
-  } else {
-    checkExist.count++;
-  }
-  next();
-});
-
-app.use(async (req, res, next) => {
-  const originalUrl = req.originalUrl;
-  const checkExist = helperRequests.find((item: { routerPath: string }) => item.routerPath === originalUrl);
-
-  res.on("finish", async function () {
-    if (checkExist) {
-      checkExist.ready = true;
-    }
-    io.emit("helperRequests", helperRequests);
-  });
-  next();
-});
-
+app.use(cronFunc);
 app.use(routes);
-
-cron.schedule("*/5 * * * * *", () => {
-  if (helperRequests.length > 0) {
-    const getElement = helperRequests[0];
-    if (getElement.ready) {
-      helperRequests.shift();
-    }
-  }
-  io.emit("helperRequests", helperRequests);
-});
 
 let tick = 0;
 

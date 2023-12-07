@@ -60,7 +60,7 @@ router.get("/", controllers.main);
  *     description: Check service status and return 200 if service is available
  *     responses:
  *       200:
- *         description: Service Unavailable
+ *         description: Service Available
  */
 
 router.post("/register", controllers.register);

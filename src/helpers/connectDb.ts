@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const connectDb = async () => {
   try {
-    await mongoose.connect(`${process.env.MONGO_URI}`);
+    await mongoose.connect(`${process.env.MONGODB_URI}`);
     // .connect("mongodb+srv://selimcoder:coderb053348@selimcoder.ctgzku3.mongodb.net/Firebase")
     console.log(`[${process.env.NODE_ENV}] MongoDB Connected`);
   } catch (error) {
