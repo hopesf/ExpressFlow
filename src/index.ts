@@ -33,9 +33,6 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
 });
 
-// swagger docs here
-swaggerDocs(app, Number(process.env.PORT));
-
 // app usages
 app.disable("x-powered-by");
 app.use(express.urlencoded({ extended: true }));
@@ -43,6 +40,8 @@ app.use(compression());
 app.use(express.json());
 app.use(helmet());
 app.use(cors());
+// swagger docs here
+swaggerDocs(app, Number(process.env.PORT));
 app.use(limiter);
 // app.use(authMiddleware);
 

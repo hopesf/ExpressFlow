@@ -11,7 +11,7 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-describe("Express App", () => {
+describe("ExpressFlow", () => {
   it("should respond with status 200 for GET requests to /", async () => {
     const response = await request(app).get("/");
     expect(response.status).toBe(200);
