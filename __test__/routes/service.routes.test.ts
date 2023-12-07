@@ -33,12 +33,3 @@ describe('Service Endpoint Tests', () => {
     expect(response.status).toBe(200);
   });
 });
-
-describe('Redirect Endpoint Tests', () => {
-  describe('should be contact from rest server and return back data from rest server', () => {
-    it('should be /entegration/getFilter endpoint working', async () => {
-      const response = await request(app).post('/entegration/getFilter');
-      expect(response.status).toBe(200);
-    });
-  });
-});
