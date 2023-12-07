@@ -1,6 +1,6 @@
 {
   "name": "express-flow",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "description": "Arasta ITC ExpressFlow Backend Redirect Project",
   "main": "./build/index.js",
   "scripts": {
