@@ -16,7 +16,7 @@ const options: swaggerJsdoc.Options = {
 
 const swaggerSpec = swaggerJsdoc(options);
 
-function swaggerDocs(app: Express, port: number) {
+function swaggerDocs(app: Express) {
   // swagger page
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -25,10 +25,6 @@ function swaggerDocs(app: Express, port: number) {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
   });
-
-  // ignore no console rule
-  // eslint-disable-next-line no-console
-  console.log(`Swagger docs available at http://localhost:${port}/docs`);
 }
 
 export default swaggerDocs;

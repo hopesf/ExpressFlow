@@ -22,11 +22,14 @@ const router: Router = express.Router();
  *         port:
  *           type: string
  *           description: Port number of the service
+ *         enabled:
+ *           type: boolean
  *       required:
  *         - apiName
  *         - protocol
  *         - host
  *         - port
+ *         - enabled
  *     unregisterBody:
  *          type: object
  *          properties:
@@ -108,7 +111,7 @@ router.post('/unregister', controllers.unregister);
  *             $ref: '#/components/schemas/unregisterBody'
  *     responses:
  *       '200':
- *         description: Api deleted successfully
+ *         description: Api deleted successfully / Api document deleted successfully
  *       '400':
  *         description: Service not found / error occurred
  *       '500':

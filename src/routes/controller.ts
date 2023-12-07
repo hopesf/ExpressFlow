@@ -57,6 +57,12 @@ const unregisterController = async (req: Request, res: Response) => {
     if (!checkExist) return res.status(400).json({ error: 'Servis Bulunamadı' });
 
     const helperInstances = checkExist.instances;
+    if (helperInstances.length === 1) {
+      // eğer sadece 1 instance varsa api'yi tamamen sil
+      await ApiServices.deleteOne({ name: registrationInfo.apiName });
+      return res.status(200).json({ message: 'Api tamamen silindi' });
+    }
+
     const existingIndex = helperInstances.findIndex(
       (instance) => instance.url === registrationInfo.url,
     );
@@ -65,7 +71,7 @@ const unregisterController = async (req: Request, res: Response) => {
     helperInstances.splice(existingIndex, 1);
     await ApiServices.findOneAndUpdate(
       { name: registrationInfo.apiName },
-      { instances: helperInstances },
+      { $set: { instances: helperInstances } },
     );
 
     return res.status(200).json({ message: 'Api silindi' });

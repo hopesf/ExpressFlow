@@ -1,2 +1,1 @@
-require("dotenv").config({ path: ".env.test" });
-jest.setTimeout(6000);
+require('dotenv').config({ path: '.env.test' });

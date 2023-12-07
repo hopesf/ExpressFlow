@@ -36,7 +36,10 @@ app.use(compression());
 app.use(express.json());
 app.use(helmet());
 app.use(cors());
-swaggerDocs(app, Number(process.env.PORT));
+
+// swagger here
+swaggerDocs(app);
+
 app.use(limiter);
 app.use((req, res, next) => cronFunc(req, res, next, io));
 app.use(routes);
@@ -60,11 +63,15 @@ let tick = 0;
 
   // App listen
   const { PORT, NODE_ENV } = process.env;
-  httpServer.listen(PORT, () => {
-    // eslint-disable-next-line no-console
-    console.log(`[${NODE_ENV}] Gate açıldı ${PORT}`);
-    runCronEveryFiveSeconds(io);
-  });
+  if (process.env.NODE_ENV !== 'test') {
+    httpServer.listen(PORT, () => {
+      // eslint-disable-next-line no-console
+      console.log(`[${NODE_ENV}] Gate açıldı ${PORT}`);
+      runCronEveryFiveSeconds(io);
+      // eslint-disable-next-line no-console
+      console.log(`Swagger docs available at http://localhost:${PORT}/docs`);
+    });
+  }
 })();
 
 export default app;

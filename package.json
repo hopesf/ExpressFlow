@@ -10,7 +10,7 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "fix": "prettier --write 'src/**/*.{ts,tsx}' && yarn lint:eslint --fix",
     "push": "git add . && git commit -m '🔧 updated project' && npm version patch && git push origin main",
-    "test": "jest --coverage"
+    "test": "jest --forceExit --detectOpenHandles  --watchAll --maxWorkers=1 --coverage"
   },
   "keywords": [],
   "author": "Selim Geçin",

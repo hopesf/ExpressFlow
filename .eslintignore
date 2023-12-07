@@ -5,3 +5,4 @@ build
 .env.development
 .env.production
 __test__
+jest.setup.js
