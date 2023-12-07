@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 interface IApiServices {
   name: string;
@@ -11,7 +11,7 @@ interface IApiServices {
       port: string;
       enabled: boolean;
       url: string;
-    }
+    },
   ];
 }
 
@@ -31,8 +31,8 @@ const ApiServicesSchema = new Schema<IApiServices>(
       },
     ],
   },
-  { versionKey: false, collection: "ApiServices" }
+  { versionKey: false, collection: 'ApiServices' },
 );
 
-const ApiServices = model<IApiServices>("ApiServices", ApiServicesSchema);
+const ApiServices = model<IApiServices>('ApiServices', ApiServicesSchema);
 export default ApiServices;

@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 interface IApiAuthorization {
   username: string;
@@ -7,8 +7,12 @@ interface IApiAuthorization {
 
 const ApiAuthorizationsSchema = new Schema<IApiAuthorization>(
   { username: String, password: String },
-  { versionKey: false, collection: "ApiAuthorizations" }
+  { versionKey: false, collection: 'ApiAuthorizations' },
 );
 
-const ApiAuthorizations = model<IApiAuthorization>("ApiAuthorizations", ApiAuthorizationsSchema, "ApiAuthorizations");
+const ApiAuthorizations = model<IApiAuthorization>(
+  'ApiAuthorizations',
+  ApiAuthorizationsSchema,
+  'ApiAuthorizations',
+);
 export default ApiAuthorizations;

@@ -1,9 +1,4 @@
 {
   "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/eslint-recommended", "plugin:@typescript-eslint/recommended"],
-  "rules": {
-    "no-console": 0
-  }
+  "extends": ["@arastaitc/eslint-config-base-typescript"]
 }

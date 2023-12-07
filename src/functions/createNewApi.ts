@@ -1,11 +1,11 @@
-import ApiServices from "../models/ApiServices";
-import { IServiceInstance } from "../routes/types";
+import ApiServices from '../models/ApiServices.ts';
+import { IServiceInstance } from '../routes/types.ts';
 
 const createNewApi = async (registrationInfo: IServiceInstance) => {
   try {
     const initialObj = {
       name: registrationInfo.apiName,
-      loadBalanceStrategy: "ROUND_ROBIN",
+      loadBalanceStrategy: 'ROUND_ROBIN',
       instances: [registrationInfo],
     };
 
@@ -13,10 +13,9 @@ const createNewApi = async (registrationInfo: IServiceInstance) => {
     await newApi.save();
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
       throw error;
     } else {
-      console.error("yeni api oluşturulurken bir sorun oluştu.");
+      // console.error('yeni api oluşturulurken bir sorun oluştu.');
       throw new Error(`Error while creating new api:${error}`);
     }
   }

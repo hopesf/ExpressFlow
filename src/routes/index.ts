@@ -1,5 +1,5 @@
-import express, { Router } from "express";
-import controllers from "./controller";
+import express, { Router } from 'express';
+import controllers from './controller.ts';
 
 const router: Router = express.Router();
 // schemas
@@ -48,7 +48,7 @@ const router: Router = express.Router();
  *           type: string
  */
 
-router.get("/", controllers.main);
+router.get('/', controllers.main);
 // "/" endpoint
 /**
  * @swagger
@@ -63,7 +63,7 @@ router.get("/", controllers.main);
  *         description: Service Available
  */
 
-router.post("/register", controllers.register);
+router.post('/register', controllers.register);
 // "/register" endpoint
 /**
  * @swagger
@@ -90,7 +90,7 @@ router.post("/register", controllers.register);
  *         description: Unexpected error
  */
 
-router.post("/unregister", controllers.unregister);
+router.post('/unregister', controllers.unregister);
 // "/unregister" endpoint
 /**
  * @swagger
@@ -115,7 +115,7 @@ router.post("/unregister", controllers.unregister);
  *         description: Unexpected error
  */
 
-router.post("/enable/:apiName", controllers.enable);
+router.post('/enable/:apiName', controllers.enable);
 // "/enable/:apiName" endpoint
 /**
  * @swagger
@@ -147,7 +147,7 @@ router.post("/enable/:apiName", controllers.enable);
  *         description: Unexpected error
  */
 
-router.all("/:apiName/:path", controllers.redirect);
+router.all('/:apiName/:path', controllers.redirect);
 // "/:apiName/:path" endpoint
 
 /**

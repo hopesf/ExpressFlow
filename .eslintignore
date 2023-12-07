@@ -4,3 +4,4 @@ build
 .github
 .env.development
 .env.production
+__test__

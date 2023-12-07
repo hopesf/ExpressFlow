@@ -1,17 +1,17 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const connectDb = async () => {
   try {
     await mongoose.connect(`${process.env.MONGODB_URI}`);
     // .connect("mongodb+srv://selimcoder:coderb053348@selimcoder.ctgzku3.mongodb.net/Firebase")
+
+    // eslint-disable-next-line no-console
     console.log(`[${process.env.NODE_ENV}] MongoDB Connected`);
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
       throw error;
     } else {
-      console.error("Beklenmeyen veritabanına bağlantı hatası oluştu.");
-      throw new Error("Database connection error");
+      throw new Error('Database connection error');
     }
   }
 };

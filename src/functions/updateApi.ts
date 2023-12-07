@@ -1,13 +1,26 @@
-import ApiServices from "../models/ApiServices";
-import { IServiceInstance, IapiAlreadyExists } from "../routes/types";
+import ApiServices from '../models/ApiServices.ts';
+import { IServiceInstance, IapiAlreadyExists } from '../routes/types.ts';
 
-const updateApi = async (checkExist: IapiAlreadyExists, registrationInfo: IServiceInstance): Promise<true | undefined> => {
+const updateApi = async (
+  checkExist: IapiAlreadyExists,
+  registrationInfo: IServiceInstance,
+): Promise<true | undefined> => {
   try {
-    const _instances = checkExist.instances;
-    const existingIndex = _instances.findIndex((instance) => instance.url === registrationInfo.url);
+    const helperInstances = checkExist.instances;
+    const existingIndex = helperInstances.findIndex(
+      (instance) => instance.url === registrationInfo.url,
+    );
 
-    existingIndex !== -1 ? (_instances[existingIndex] = registrationInfo) : _instances.push(registrationInfo);
-    await ApiServices.findOneAndUpdate({ name: registrationInfo.apiName }, { instances: _instances });
+    if (existingIndex !== -1) {
+      helperInstances[existingIndex] = registrationInfo;
+    } else {
+      helperInstances.push(registrationInfo);
+    }
+
+    await ApiServices.findOneAndUpdate(
+      { name: registrationInfo.apiName },
+      { instances: helperInstances },
+    );
 
     return true;
   } catch (error) {

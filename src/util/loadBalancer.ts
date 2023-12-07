@@ -1,20 +1,24 @@
 // util/loadBalancer.ts
 
-import { IService } from "../routes/types";
+import { IService } from '../routes/types.ts';
+
 type LoadBalanceStrategy = (service: IService) => number;
 
-const isEnabled = (service: IService, index: number, loadBalanceStrategy: LoadBalanceStrategy): number => {
+const isEnabled = (
+  service: IService,
+  index: number,
+  loadBalanceStrategy: LoadBalanceStrategy,
+): number => {
   return service.instances[index].enabled ? index : loadBalanceStrategy(service);
 };
 
 const ROUND_ROBIN: LoadBalanceStrategy = (service: IService): number => {
-  const newIndex = ++service.index >= service.instances.length ? 0 : service.index;
-  service.index = newIndex;
+  const helperService = { ...service };
 
-  // return newIndex;
-  return isEnabled(service, newIndex, ROUND_ROBIN);
+  const newIndex =
+    helperService.index + 1 >= helperService.instances.length ? 0 : helperService.index + 1;
+  return isEnabled(helperService, newIndex, ROUND_ROBIN);
 };
-
 // disable eslint for this line
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const loadBalancer: any = {

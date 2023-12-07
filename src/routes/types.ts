@@ -31,7 +31,7 @@ export interface IapiAlreadyExists {
       port: string;
       enabled: boolean;
       url: string;
-    }
+    },
   ];
 }
 

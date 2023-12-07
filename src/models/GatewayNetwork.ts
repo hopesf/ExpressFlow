@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 interface IGatewayNetwork {
   routePath: string;
@@ -7,8 +7,12 @@ interface IGatewayNetwork {
 
 const GatewayNetworkSchema = new Schema<IGatewayNetwork>(
   { routePath: String, count: Number },
-  { versionKey: false, collection: "ApiAuthorizations" }
+  { versionKey: false, collection: 'ApiAuthorizations' },
 );
 
-const GatewayNetwork = model<IGatewayNetwork>("GatewayNetwork", GatewayNetworkSchema, "GatewayNetwork");
+const GatewayNetwork = model<IGatewayNetwork>(
+  'GatewayNetwork',
+  GatewayNetworkSchema,
+  'GatewayNetwork',
+);
 export default GatewayNetwork;

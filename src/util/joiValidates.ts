@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi from 'joi';
 
 interface ValidationError extends Error {
   details: Joi.ValidationErrorItem[];
@@ -32,13 +32,13 @@ async function validateBodyData(schema: object, validateData: object) {
       // Handle the validation error here, you can log it or perform other actions
       throw validationError;
     }
-    throw new Error("Validation error occurred.");
+    throw new Error('Validation error occurred.');
   }
 }
-
-export const jois = {
+const jois = {
   register: registerSchema,
   unregister: unRegisterSchema,
   enableDisable: enableDisableSchema,
   validateFunc: validateBodyData,
 };
+export default jois;
