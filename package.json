@@ -21,7 +21,7 @@
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.4",
     "@types/node-cron": "^3.0.11",
-    "@types/os-utils": "^0.0.3",
+    "@types/os-utils": "^0.0.4",
     "@types/supertest": "^2.0.16",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",
