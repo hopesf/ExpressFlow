@@ -20,6 +20,8 @@
     "@types/node": "^20.8.8",
     "@types/node-cron": "^3.0.10",
     "@types/os-utils": "^0.0.3",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
     "eslint": "^8.52.0",
@@ -41,6 +43,8 @@
     "mongoose": "^7.6.3",
     "node-cron": "^3.0.2",
     "os-utils": "^0.0.14",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
   }
 }

@@ -10,7 +10,7 @@ import loadBalancer from "../util/loadBalancer";
 
 // controllers
 const mainController = async (req: Request, res: Response) => {
-  res.status(503).send("Service Unavailable");
+  res.status(200).send("Service Unavailable");
 };
 
 const registerController = async (req: Request, res: Response) => {
@@ -34,7 +34,7 @@ const registerController = async (req: Request, res: Response) => {
       }
     } else {
       await updateApi(checkExist, registrationInfo);
-      res.status(201).json({ message: "Api Güncellendi" });
+      res.status(201).json({ message: "Servis güncellendi" });
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -54,11 +54,11 @@ const unregisterController = async (req: Request, res: Response) => {
 
     // burada apiName'i mongodbde arayacağız.
     const checkExist = await apiAlreadyExists(registrationInfo);
-    if (!checkExist) return res.status(400).json({ error: "Api bulunamadı" });
+    if (!checkExist) return res.status(400).json({ error: "Servis Bulunamadı" });
 
     const _instances = checkExist.instances;
     const existingIndex = _instances.findIndex((instance) => instance.url === registrationInfo.url);
-    if (existingIndex === -1) return res.status(400).json({ error: "Api bulunamadı" });
+    if (existingIndex === -1) return res.status(400).json({ error: "Servis Bulunamadı" });
 
     _instances.splice(existingIndex, 1);
     await ApiServices.findOneAndUpdate({ name: registrationInfo.apiName }, { instances: _instances });
@@ -82,16 +82,16 @@ const enableController = async (req: Request, res: Response) => {
 
     // burada apiName'i mongodbde arayacağız.
     const checkExist = await apiAlreadyExists(registrationInfo);
-    if (!checkExist) return res.status(400).json({ error: "Api bulunamadı" });
+    if (!checkExist) return res.status(400).json({ error: "Servis bulunamadı" });
 
     const _instances = checkExist.instances;
     const existingIndex = _instances.findIndex((instance) => instance.url === registrationInfo.url);
-    if (existingIndex === -1) return res.status(400).json({ error: "Api bulunamadı" });
+    if (existingIndex === -1) return res.status(400).json({ error: "Servis Bulunamadı" });
 
     _instances[existingIndex].enabled = registrationInfo.enabled;
     await ApiServices.findOneAndUpdate({ name: registrationInfo.apiName }, { instances: _instances });
 
-    res.status(200).json({ message: "Api güncellendi" });
+    res.status(200).json({ message: "Servis güncellendi" });
   } catch (error) {
     if (error instanceof Error) {
       // Doğrulama hatası olursa buraya ulaşılır
@@ -108,7 +108,7 @@ const redirectController = async (req: Request, res: Response) => {
 
     // burada apiName'i mongodbde arayacağız.
     const checkExist = await apiAlreadyExists({ apiName });
-    if (!checkExist) return res.status(400).json({ error: "Api bulunamadı" });
+    if (!checkExist) return res.status(400).json({ error: "Servis Bulunamadı" });
 
     if (!checkExist.loadBalanceStrategy) {
       checkExist.loadBalanceStrategy = "ROUND_ROBIN";

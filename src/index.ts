@@ -18,6 +18,7 @@ import cron from "node-cron";
 import helmet from "helmet";
 
 // router import
+import swaggerDocs from "./util/swagger";
 import routes from "./routes";
 
 // app started
@@ -32,6 +33,9 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
 });
 
+// swagger docs here
+swaggerDocs(app, Number(process.env.PORT));
+
 // app usages
 app.disable("x-powered-by");
 app.use(express.urlencoded({ extended: true }));
@@ -40,6 +44,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 app.use(limiter);
+
 // app.use(authMiddleware);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
